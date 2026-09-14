@@ -1,0 +1,17 @@
+# Play Console 자격 증명.
+#
+# 키는 리포 밖에 둔다. gitignore에만 기대면 `git clean -xdf` 한 번에 날아가고
+# .gitignore가 깨지면 커밋될 수도 있어서다. docs/play-api-automation.md 참고.
+#
+#   1. $SUPPLY_JSON_KEY                              (CI 등)
+#   2. ~/.pink-spider/secrets/nonogram/play-store-key.json
+#   3. android/play-store-key.json                   (예전 위치)
+json_key_file(
+  [
+    ENV["SUPPLY_JSON_KEY"],
+    File.expand_path("~/.pink-spider/secrets/nonogram/play-store-key.json"),
+    File.expand_path("../play-store-key.json", __dir__),
+  ].compact.find { |p| File.exist?(p) } || ""
+)
+
+package_name("io.pinkspider.nonogram")

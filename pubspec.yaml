@@ -1,0 +1,19 @@
+name: nonogram_app_workspace
+description: Pub workspace root for the nonogram app (engine + rule package + app).
+publish_to: none
+
+environment:
+  sdk: ^3.6.0
+
+# Dart pub workspace: `flutter pub get` here resolves every member package
+# with a single lockfile. Add new apps / rule packages to this list.
+workspace:
+  - packages/puzzle_engine
+  - packages/rules_nonogram
+  - packages/core_ads
+  - packages/core_analytics
+  - packages/core_ui
+  - apps/nonogram
+
+dev_dependencies:
+  flutter_lints: ^5.0.0

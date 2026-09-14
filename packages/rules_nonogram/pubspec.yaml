@@ -1,0 +1,16 @@
+name: rules_nonogram
+description: Nonogram (Picross) rule for puzzle_engine — shape library, line solver, uniqueness check, difficulty rater and hints.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+
+dependencies:
+  puzzle_engine:
+    path: ../puzzle_engine
+
+dev_dependencies:
+  test: ^1.25.0
+  lints: ^5.0.0

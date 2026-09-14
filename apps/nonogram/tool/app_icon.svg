@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- A small nonogram mid-solve: clue strip on two edges, some cells
+       filled, one crossed. Reads as the game at icon size. -->
+  <rect width="512" height="512" fill="#FFFFFF"/>
+  <g transform="translate(96 96)">
+    <!-- filled cells forming a simple, readable block -->
+    <g fill="#2563EB">
+      <rect x="0"   y="0"   width="104" height="104"/>
+      <rect x="104" y="104" width="104" height="104"/>
+      <rect x="208" y="104" width="104" height="104"/>
+      <rect x="0"   y="208" width="104" height="104"/>
+      <rect x="208" y="208" width="104" height="104"/>
+    </g>
+    <!-- grid -->
+    <g stroke="#1E293B" stroke-width="10" stroke-linecap="butt" fill="none">
+      <rect x="0" y="0" width="312" height="312"/>
+      <line x1="104" y1="0" x2="104" y2="312"/>
+      <line x1="208" y1="0" x2="208" y2="312"/>
+      <line x1="0" y1="104" x2="312" y2="104"/>
+      <line x1="0" y1="208" x2="312" y2="208"/>
+    </g>
+    <!-- a cross, the other half of how you solve one -->
+    <g stroke="#64748B" stroke-width="14" stroke-linecap="round">
+      <line x1="134" y1="30" x2="178" y2="74"/>
+      <line x1="178" y1="30" x2="134" y2="74"/>
+    </g>
+  </g>
+</svg>

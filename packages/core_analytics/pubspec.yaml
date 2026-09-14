@@ -1,0 +1,18 @@
+name: core_analytics
+description: Analytics + remote-config abstractions shared by every app. Firebase implementation is added per app once google-services files exist.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

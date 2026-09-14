@@ -1,0 +1,3 @@
+/* Shown inside the system App Tracking Transparency prompt.
+   Keep it to one line: iOS truncates long text. */
+"NSUserTrackingUsageDescription" = "Allowing this keeps Nonogram Daily free — it lets us show ads that fit you instead of random ones.";

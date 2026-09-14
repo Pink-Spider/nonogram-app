@@ -1,0 +1,350 @@
+import 'cell.dart';
+
+/// A picture the player uncovers by solving.
+///
+/// Nonograms are only satisfying when the finished grid is *something*.
+/// Random bitmaps produce noise that reads as a mistake, so every puzzle
+/// comes from this library instead.
+class Shape {
+  const Shape({required this.id, required this.size, required this.rows});
+
+  /// Stable id for analytics and for the "you drew a cat" reveal. Never
+  /// rename — saved games reference it.
+  final String id;
+
+  /// Edge length. Shapes are square because the board is.
+  final int size;
+
+  /// One string per row, `#` filled and anything else blank. Kept as text
+  /// so the picture is reviewable in a diff.
+  final List<String> rows;
+
+  /// Row-major grid of [Cell.filled] / [Cell.unknown].
+  List<int> toGrid() {
+    assert(rows.length == size, '$id: expected $size rows, got ${rows.length}');
+    final grid = <int>[];
+    for (final row in rows) {
+      assert(row.length == size, '$id: row "$row" is not $size wide');
+      for (final ch in row.split('')) {
+        grid.add(ch == '#' ? Cell.filled : Cell.unknown);
+      }
+    }
+    return grid;
+  }
+
+  int get filledCount => rows.fold(0, (n, r) => n + '#'.allMatches(r).length);
+
+  /// Fraction of the grid that is filled. Pictures that are almost empty or
+  /// almost solid make dull puzzles; the library sticks to roughly 30–70%.
+  double get density => filledCount / (size * size);
+}
+
+/// Shapes grouped by board size. Sizes match the difficulty tiers:
+/// 5 easy, 10 medium, 15 hard, 20 expert.
+///
+/// Drawing rules that keep these solvable and recognisable:
+///  * no isolated single cells in a sea of blanks — they read as noise and
+///    are usually what makes a puzzle need guessing
+///  * keep a silhouette readable at a glance once solved
+///  * avoid fully blank rows or columns at the edges; they waste board
+abstract final class ShapeLibrary {
+  static const List<Shape> _size5 = [
+    Shape(id: 'heart', size: 5, rows: [
+      '.#.#.',
+      '#####',
+      '#####',
+      '.###.',
+      '..#..',
+    ]),
+    Shape(id: 'house', size: 5, rows: [
+      '..#..',
+      '.###.',
+      '#####',
+      '#.#.#',
+      '#.#.#',
+    ]),
+    Shape(id: 'cup', size: 5, rows: [
+      '#...#',
+      '#####',
+      '#...#',
+      '#...#',
+      '#####',
+    ]),
+    Shape(id: 'tree', size: 5, rows: [
+      '..#..',
+      '.###.',
+      '#####',
+      '..#..',
+      '..#..',
+    ]),
+    Shape(id: 'smile', size: 5, rows: [
+      '.###.',
+      '#.#.#',
+      '#####',
+      '##.##',
+      '.###.',
+    ]),
+    Shape(id: 'arrow', size: 5, rows: [
+      '..#..',
+      '.###.',
+      '#####',
+      '..#..',
+      '..#..',
+    ]),
+    Shape(id: 'boat', size: 5, rows: [
+      '..#..',
+      '..##.',
+      '..#..',
+      '#####',
+      '.###.',
+    ]),
+    Shape(id: 'key', size: 5, rows: [
+      '###.#',
+      '#.#.#',
+      '###.#',
+      '..#.#',
+      '..###',
+    ]),
+  ];
+
+  static const List<Shape> _size10 = [
+    Shape(id: 'cat', size: 10, rows: [
+      '#........#',
+      '##......##',
+      '.########.',
+      '.#.####.#.',
+      '.########.',
+      '.##.##.##.',
+      '.########.',
+      '..######..',
+      '..#....#..',
+      '.##....##.',
+    ]),
+    Shape(id: 'mushroom', size: 10, rows: [
+      '..######..',
+      '.########.',
+      '##########',
+      '##.####.##',
+      '##########',
+      '.########.',
+      '...####...',
+      '...####...',
+      '...####...',
+      '..######..',
+    ]),
+    Shape(id: 'anchor', size: 10, rows: [
+      '....##....',
+      '...####...',
+      '....##....',
+      '..######..',
+      '....##....',
+      '....##....',
+      '#...##...#',
+      '#...##...#',
+      '#########.',
+      '.#######..',
+    ]),
+    Shape(id: 'umbrella', size: 10, rows: [
+      '#...#....#',
+      '#.#####..#',
+      '.#######..',
+      '##########',
+      '##.###.##.',
+      '#...#....#',
+      '#...#....#',
+      '#...#....#',
+      '#...#..#.#',
+      '#....##..#',
+    ]),
+    Shape(id: 'penguin', size: 10, rows: [
+      '...####...',
+      '..######..',
+      '..#.##.#..',
+      '..######..',
+      '...####...',
+      '..######..',
+      '.########.',
+      '###.##.###',
+      '.########.',
+      '.##....##.',
+    ]),
+    Shape(id: 'rocket', size: 10, rows: [
+      '....##....',
+      '...####...',
+      '...####...',
+      '..######..',
+      '..#.##.#..',
+      '..######..',
+      '.########.',
+      '##.####.##',
+      '...####...',
+      '....##....',
+    ]),
+  ];
+
+  static const List<Shape> _size15 = [
+    Shape(id: 'butterfly', size: 15, rows: [
+      '###.......###..',
+      '#####.....#####',
+      '#######.#######',
+      '########.######',
+      '#######.#######',
+      '######...######',
+      '#####..#..#####',
+      '####...#...####',
+      '#####..#..#####',
+      '######.#.######',
+      '#######.#######',
+      '######...######',
+      '#####.....#####',
+      '###.......###..',
+      '.#.........#...',
+    ]),
+    Shape(id: 'elephant', size: 15, rows: [
+      '....#######....',
+      '..###########..',
+      '.#############.',
+      '.##.#######.##.',
+      '.#############.',
+      '.#############.',
+      '.####.....####.',
+      '.###.......###.',
+      '.###.......###.',
+      '.###.......###.',
+      '.###.......###.',
+      '.##.........##.',
+      '.##.........##.',
+      '###.........###',
+      '###.........###',
+    ]),
+    Shape(id: 'sailboat', size: 15, rows: [
+      '#......#.......',
+      '#.....##.......',
+      '#....###.......',
+      '#...####.......',
+      '#..#####.......',
+      '#.######.......',
+      '########.......',
+      '########......#',
+      '#......#......#',
+      '#......#......#',
+      '#..#########..#',
+      '#.###########.#',
+      '###############',
+      '#.###########.#',
+      '#..#########..#',
+    ]),
+    Shape(id: 'flower', size: 15, rows: [
+      '#....#####....#',
+      '#..#########..#',
+      '#############..',
+      '#####.#####...#',
+      '#####...####..#',
+      '#####...#####.#',
+      '#####...#####.#',
+      '#####...#####.#',
+      '#####...####..#',
+      '#####.#####...#',
+      '#############..',
+      '#..#########..#',
+      '#.....###.....#',
+      '#.....###.....#',
+      '#....#####....#',
+    ]),
+  ];
+
+  static const List<Shape> _size20 = [
+    Shape(id: 'dragonfly', size: 20, rows: [
+      '####............####',
+      '######........######',
+      '########....########',
+      '##########.#########',
+      '#########...########',
+      '########.....#######',
+      '#######.......######',
+      '######....#....#####',
+      '#####....###....####',
+      '####....#####....###',
+      '#####....###....####',
+      '######....#....#####',
+      '#######.......######',
+      '########.....#######',
+      '#########...########',
+      '##########.#########',
+      '########....########',
+      '######........######',
+      '####............####',
+      '.......#####........',
+    ]),
+    Shape(id: 'lighthouse', size: 20, rows: [
+      '........####........',
+      '.......######.......',
+      '......########......',
+      '......##....##......',
+      '......########......',
+      '.......######.......',
+      '.......#....#.......',
+      '......##....##......',
+      '......#......#......',
+      '......##....##......',
+      '.....##......##.....',
+      '.....#........#.....',
+      '.....##......##.....',
+      '....##........##....',
+      '....#..........#....',
+      '....############....',
+      '...##############...',
+      '..################..',
+      '.##################.',
+      '####################',
+    ]),
+    Shape(id: 'owl', size: 20, rows: [
+      '#...##########....#.',
+      '#..############...#.',
+      '#.##############..#.',
+      '################...#',
+      '#####........####..#',
+      '####..##..##..###..#',
+      '####.####.####.###.#',
+      '####..##..##..###..#',
+      '#####........####..#',
+      '#######.##.######..#',
+      '################...#',
+      '#.##############...#',
+      '#.####......####...#',
+      '#.###........###...#',
+      '#.###........###...#',
+      '#..###......###....#',
+      '#...##########.....#',
+      '#....########......#',
+      '#.##..........##...#',
+      '#####........#####.#',
+    ]),
+  ];
+
+  /// Shapes available for a board [size], in library order.
+  static List<Shape> forSize(int size) => switch (size) {
+        5 => _size5,
+        10 => _size10,
+        15 => _size15,
+        20 => _size20,
+        _ => const [],
+      };
+
+  static const List<int> sizes = [5, 10, 15, 20];
+
+  static Shape? byId(String id) {
+    for (final size in sizes) {
+      for (final shape in forSize(size)) {
+        if (shape.id == id) return shape;
+      }
+    }
+    return null;
+  }
+
+  /// Every shape, for the test that checks each one is well-formed and
+  /// actually solvable.
+  static List<Shape> get all => [
+        for (final size in sizes) ...forSize(size),
+      ];
+}

@@ -1,0 +1,20 @@
+name: core_ads
+description: AdMob integration shared by every app — service abstraction, consent (UMP), banner widget, frequency gating.
+version: 0.1.0
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  google_mobile_ads: ^9.1.0
+  app_tracking_transparency: ^2.0.6
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0

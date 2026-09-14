@@ -1,0 +1,84 @@
+{
+  "@@locale": "en",
+  "appTitle": "Nonogram Daily",
+  "newGame": "New game",
+  "continueGame": "Continue",
+  "dailyChallenge": "Daily challenge",
+  "dailyDone": "Today's puzzle solved",
+  "chooseDifficulty": "Choose difficulty",
+  "difficultyEasy": "Easy",
+  "difficultyMedium": "Medium",
+  "difficultyHard": "Hard",
+  "difficultyExpert": "Expert",
+  "mistakes": "Mistakes",
+  "mistakesCount": "{count}/{max}",
+  "@mistakesCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "time": "Time",
+  "undo": "Undo",
+  "erase": "Erase",
+  "notes": "Cross",
+  "hint": "Hint",
+  "hintsLeft": "{count} free",
+  "@hintsLeft": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "watchAdForHint": "Watch ad for a hint",
+  "watchAdToContinue": "Watch ad to continue",
+  "adNotReady": "Ad not ready yet, try again in a moment",
+  "solvedTitle": "Solved!",
+  "solvedBody": "{difficulty} · {time} · {mistakes} mistakes",
+  "@solvedBody": {
+    "placeholders": {
+      "difficulty": {
+        "type": "String"
+      },
+      "time": {
+        "type": "String"
+      },
+      "mistakes": {
+        "type": "int"
+      }
+    }
+  },
+  "failedTitle": "Out of mistakes",
+  "failedBody": "You made {max} mistakes. Watch an ad to keep going with one more chance.",
+  "@failedBody": {
+    "placeholders": {
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "giveUp": "Give up",
+  "playAgain": "Play again",
+  "backHome": "Home",
+  "adFreeHour": "Watch ad: no ads for 1 hour",
+  "adFreeActive": "Ad-free until {time}",
+  "@adFreeActive": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  },
+  "generating": "Generating puzzle…",
+  "techniqueReveal": "Here’s what belongs in this square.",
+  "privacySettings": "Privacy settings",
+  "techniqueRowForces": "The numbers on this row leave only one place for this square — every arrangement that fits fills it.",
+  "techniqueRowBlanks": "No arrangement of this row’s numbers can reach this square, so it must be blank.",
+  "techniqueColForces": "The numbers on this column leave only one place for this square — every arrangement that fits fills it.",
+  "techniqueColBlanks": "No arrangement of this column’s numbers can reach this square, so it must be blank."
+}

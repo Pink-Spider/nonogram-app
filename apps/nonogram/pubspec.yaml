@@ -1,0 +1,41 @@
+name: nonogram
+description: Nonogram (Picross) — solve the clues, uncover the picture. Ad-supported, no IAP.
+publish_to: none
+version: 0.1.0+1
+resolution: workspace
+
+environment:
+  sdk: ^3.6.0
+  flutter: ">=3.27.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  flutter_localizations:
+    sdk: flutter
+  intl: any # pinned by flutter_localizations
+
+  flutter_riverpod: ^2.6.1
+  shared_preferences: ^2.3.0
+
+  puzzle_engine:
+    path: ../../packages/puzzle_engine
+  rules_nonogram:
+    path: ../../packages/rules_nonogram
+  core_ads:
+    path: ../../packages/core_ads
+  core_analytics:
+    path: ../../packages/core_analytics
+  core_ui:
+    path: ../../packages/core_ui
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  integration_test:
+    sdk: flutter
+  flutter_lints: ^5.0.0
+
+flutter:
+  uses-material-design: true
+  generate: true

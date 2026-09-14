@@ -1,0 +1,81 @@
+# Play Console 업로드 자동화.
+#
+#   cd apps/nonogram/android
+#   fastlane internal      # 내부 테스트 트랙에 올린다
+#   fastlane production    # 프로덕션에 초안으로 올린다(자동 출시 안 함)
+#
+# AAB가 50MB를 넘어 브라우저 드래그앤드롭이 번거로워서 만들었다.
+# 빌드는 flutter가 하고 fastlane은 업로드만 한다. 서명은 android/key.properties가
+# 없으면 디버그 키로 되므로(빌드는 성공한다) 업로드 전에 반드시 확인한다.
+
+opt_out_usage  # fastlane 익명 분석 전송 끔
+default_platform(:android)
+
+APP_DIR = File.expand_path("../..", __dir__)
+AAB = File.join(APP_DIR, "build/app/outputs/bundle/release/app-release.aab")
+
+platform :android do
+  # 서명 키가 어디 있는지 gradle과 같은 순서로 확인한다. 없으면 릴리스가
+  # 디버그 키로 서명되는데 빌드는 성공해서, Play가 거부할 때까지 모른다.
+  before_all do
+    found = [
+      ENV["NONOGRAM_SECRETS"] && "#{ENV['NONOGRAM_SECRETS']}/key.properties",
+      File.expand_path("~/.pink-spider/secrets/nonogram/key.properties"),
+      File.join(APP_DIR, "android/key.properties"),
+    ].compact.find { |p| File.exist?(p) }
+
+    UI.user_error!(
+      "key.properties를 못 찾았다. 이대로 빌드하면 디버그 키로 서명되고 " \
+      "Play가 업로드를 거부한다. docs/android-signing.md 참고."
+    ) unless found
+
+    UI.message("signing: #{found}")
+  end
+
+  desc "flutter build appbundle --release (main_prod.dart)"
+  lane :build do
+    Dir.chdir(APP_DIR) do
+      # Real ad unit ids are not in the repo. Without them the prod flavor
+      # silently falls back to Google's test units — the app works and
+      # earns nothing — so ad_units.sh exits non-zero and takes the build
+      # down with it. See docs/ad-units.md.
+      defines = `tool/ad_units.sh`.strip
+      UI.user_error!("tool/ad_units.sh 실패 — docs/ad-units.md 참고") unless $?.success?
+      sh("flutter", "build", "appbundle", "--release",
+         "-t", "lib/main_prod.dart", *defines.split(" "))
+    end
+    UI.success("빌드 완료: #{AAB}")
+  end
+
+  desc "내부 테스트 트랙에 업로드"
+  lane :internal do |options|
+    build unless options[:skip_build]
+    upload_track("internal", options)
+  end
+
+  desc "프로덕션 트랙에 업로드 (초안 — 출시는 콘솔에서 직접)"
+  lane :production do |options|
+    build unless options[:skip_build]
+    upload_track("production", options)
+  end
+end
+
+# 실제 업로드. release_status를 draft로 두는 게 핵심이다.
+# completed로 올리면 심사 통과 즉시 전체 공개된다.
+def upload_track(track, options)
+  UI.user_error!("AAB가 없다: #{AAB}") unless File.exist?(AAB)
+
+  upload_to_play_store(
+    track: track,
+    aab: AAB,
+    release_status: options[:status] || "draft",
+    skip_upload_metadata: true,
+    skip_upload_images: true,
+    skip_upload_screenshots: true,
+    skip_upload_changelogs: true,
+    validate_only: options[:dry_run] || false
+  )
+
+  size_mb = (File.size(AAB) / 1024.0 / 1024.0).round(1)
+  UI.success("#{track} 트랙에 업로드했다 (#{size_mb}MB). 출시는 Play Console에서.")
+end
