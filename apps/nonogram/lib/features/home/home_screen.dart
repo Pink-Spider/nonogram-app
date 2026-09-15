@@ -8,13 +8,35 @@ import '../../app/providers.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../game/game_controller.dart';
 import '../game/game_screen.dart';
+import '../stats/stats_screen.dart';
+import '../tutorial/tutorial_screen.dart';
 import 'widgets/banner_slot.dart';
 
-class HomeScreen extends ConsumerWidget {
+class HomeScreen extends ConsumerStatefulWidget {
   const HomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<HomeScreen> createState() => _HomeScreenState();
+}
+
+class _HomeScreenState extends ConsumerState<HomeScreen> {
+  @override
+  void initState() {
+    super.initState();
+    // First launch: teach the rules before showing the menu. Finishing or
+    // skipping sets the flag, so this fires exactly once.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      if (!ref.read(gamePersistenceProvider).isTutorialDone) {
+        Navigator.of(context).push(
+          MaterialPageRoute<void>(builder: (_) => const TutorialScreen()),
+        );
+      }
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final l = AppLocalizations.of(context);
     final persistence = ref.watch(gamePersistenceProvider);
     final generating = ref.watch(generatingProvider);
@@ -43,6 +65,20 @@ class HomeScreen extends ConsumerWidget {
         title: Text(l.appTitle),
         centerTitle: true,
         actions: [
+          IconButton(
+            tooltip: l.howToPlay,
+            icon: const Icon(Icons.help_outline),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const TutorialScreen()),
+            ),
+          ),
+          IconButton(
+            tooltip: l.statsTitle,
+            icon: const Icon(Icons.bar_chart),
+            onPressed: () => Navigator.of(context).push(
+              MaterialPageRoute<void>(builder: (_) => const StatsScreen()),
+            ),
+          ),
           IconButton(
             tooltip: l.privacySettings,
             icon: const Icon(Icons.privacy_tip_outlined),

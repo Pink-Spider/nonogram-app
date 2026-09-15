@@ -32,6 +32,29 @@ class _TinyRule extends PuzzleRule {
       peers(index).where((p) => board[p] == value).toList();
 }
 
+/// A rule with a nonogram-style annotation value: 9 marks "definitely
+/// blank", never appears in a solution, and must not block the win.
+class _MarkerRule extends _TinyRule {
+  @override
+  int get maxValue => 9;
+
+  @override
+  GridPuzzle generate({required Difficulty difficulty, required int seed}) =>
+      GridPuzzle(
+        ruleId: id,
+        size: 2,
+        givens: const [0, 0, 0, 0],
+        // Bottom-right stays blank, like a nonogram's empty cells.
+        solution: const [1, 2, 2, 0],
+        difficulty: difficulty,
+        seed: seed,
+      );
+
+  @override
+  bool isCorrect(int index, int value, List<int> solution) =>
+      value == 9 ? solution[index] == 0 : value == solution[index];
+}
+
 void main() {
   late GameSession s;
 
@@ -118,6 +141,23 @@ void main() {
     s.place(2, 2);
     s.place(3, 1);
     expect(s.status, GameStatus.solved);
+  });
+
+  test('isSolved consults the rule — an annotation value on a blank cell '
+      'must not block the win', () {
+    final rule = _MarkerRule();
+    final session = GameSession(
+      puzzle: rule.generate(difficulty: Difficulty.easy, seed: 1),
+      rule: rule,
+      maxMistakes: 0,
+    );
+    expect(session.place(3, 9), PlaceResult.correct); // annotate the blank
+    session.place(0, 1);
+    session.place(1, 2);
+    session.place(2, 2);
+    // The board is [1,2,2,9] against solution [1,2,2,0]: not equal, but
+    // the rule says every cell is in a correct final state.
+    expect(session.status, GameStatus.solved);
   });
 
   test('round-trips through json', () {

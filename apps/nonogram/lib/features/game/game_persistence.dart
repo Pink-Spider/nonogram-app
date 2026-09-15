@@ -14,7 +14,9 @@ class GamePersistence {
   static const _kSessionDaily = 'session.current.isDaily';
   static const _kDailyDone = 'daily.done.'; // + yyyy-MM-dd
   static const _kSolvedCount = 'stats.solved.'; // + difficulty
+  static const _kBestMs = 'stats.bestMs.'; // + difficulty
   static const _kAdFreeUntil = 'ads.adFreeUntilMs';
+  static const _kTutorialDone = 'tutorial.done';
 
   // ---------------------------------------------------------- session
 
@@ -61,12 +63,37 @@ class GamePersistence {
   Future<void> markDailyDone(DateTime date) =>
       _prefs.setBool(_kDailyDone + DailySeed.dateKey(date), true);
 
+  /// Every date whose daily was completed, as [DailySeed.dateKey] strings.
+  Set<String> dailyDoneDates() => {
+        for (final key in _prefs.getKeys())
+          if (key.startsWith(_kDailyDone) && (_prefs.getBool(key) ?? false))
+            key.substring(_kDailyDone.length),
+      };
+
   // ------------------------------------------------------------ stats
 
   int solvedCount(Difficulty d) => _prefs.getInt(_kSolvedCount + d.id) ?? 0;
 
-  Future<void> incrementSolved(Difficulty d) =>
-      _prefs.setInt(_kSolvedCount + d.id, solvedCount(d) + 1);
+  Duration? bestTime(Difficulty d) {
+    final ms = _prefs.getInt(_kBestMs + d.id);
+    return ms == null ? null : Duration(milliseconds: ms);
+  }
+
+  /// Count a solve and keep the best time — one call at the moment of
+  /// victory, so the two stats can never disagree.
+  Future<void> recordSolve(Difficulty d, Duration elapsed) async {
+    await _prefs.setInt(_kSolvedCount + d.id, solvedCount(d) + 1);
+    final best = bestTime(d);
+    if (best == null || elapsed < best) {
+      await _prefs.setInt(_kBestMs + d.id, elapsed.inMilliseconds);
+    }
+  }
+
+  // --------------------------------------------------------- tutorial
+
+  bool get isTutorialDone => _prefs.getBool(_kTutorialDone) ?? false;
+
+  Future<void> markTutorialDone() => _prefs.setBool(_kTutorialDone, true);
 
   // -------------------------------------------------------------- ads
 

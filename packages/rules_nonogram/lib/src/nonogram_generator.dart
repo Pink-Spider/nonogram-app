@@ -18,7 +18,9 @@ import 'shapes.dart';
 abstract final class NonogramGenerator {
   /// Bump when shape data or rating changes, so a stored daily puzzle that
   /// no longer matches is regenerated instead of silently differing.
-  static const int algorithmVersion = 1;
+  ///
+  /// v2: pre-release library expansion, 21 → 48 shapes across all sizes.
+  static const int algorithmVersion = 2;
 
   static const String ruleId = 'nonogram';
 

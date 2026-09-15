@@ -8,14 +8,14 @@
 #
 # App Store Connect rejects a build number it has already seen for this
 # version, so bump it on every re-upload (either the argument here or the
-# +N in apps/sudoku/pubspec.yaml).
+# +N in apps/nonogram/pubspec.yaml).
 #
 # The app record must already exist in App Store Connect; neither
 # Transporter nor the API can create one.
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-APP="$ROOT/apps/sudoku"
+APP="$ROOT/apps/nonogram"
 ENTRY=lib/main_prod.dart
 
 cd "$APP"

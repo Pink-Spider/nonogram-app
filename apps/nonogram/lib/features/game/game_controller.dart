@@ -353,7 +353,7 @@ class GameController extends Notifier<GameViewState?> {
       final persistence = ref.read(gamePersistenceProvider);
       if (status == GameStatus.solved) {
         unawaited(analytics.logEvent(AnalyticsEvents.puzzleComplete, _params(s)));
-        unawaited(persistence.incrementSolved(s.puzzle.difficulty));
+        unawaited(persistence.recordSolve(s.puzzle.difficulty, s.elapsed));
         if (_isDaily) unawaited(persistence.markDailyDone(DateTime.now()));
         unawaited(persistence.clearSession());
       } else {

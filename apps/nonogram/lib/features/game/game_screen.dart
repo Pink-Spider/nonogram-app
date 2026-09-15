@@ -10,8 +10,10 @@ import '../../app/providers.dart';
 import '../../l10n/generated/app_localizations.dart';
 import '../home/widgets/banner_slot.dart';
 import 'game_controller.dart';
+import 'shape_names.dart';
 import 'widgets/game_toolbar.dart';
 import 'widgets/nonogram_board.dart';
+import 'widgets/solved_card.dart';
 
 class GameScreen extends ConsumerStatefulWidget {
   const GameScreen({super.key});
@@ -55,18 +57,15 @@ class _GameScreenState extends ConsumerState<GameScreen> with WidgetsBindingObse
     final state = ref.watch(gameControllerProvider);
     final controller = ref.read(gameControllerProvider.notifier);
 
-    // Result dialogs, once per status transition.
+    // The failure dialog, once per status transition. Solving shows no
+    // dialog — the board becomes the picture and SolvedCard slides up.
     ref.listen<GameViewState?>(gameControllerProvider, (prev, next) {
       if (next == null) return;
-      if (next.status != GameStatus.playing && _shownDialogFor != next.status) {
+      if (next.status == GameStatus.failed && _shownDialogFor != next.status) {
         _shownDialogFor = next.status;
         WidgetsBinding.instance.addPostFrameCallback((_) {
           if (!mounted) return;
-          if (next.status == GameStatus.solved) {
-            unawaited(_showSolved(next));
-          } else {
-            unawaited(_showFailed(next));
-          }
+          unawaited(_showFailed(next));
         });
       }
       if (next.status == GameStatus.playing) _shownDialogFor = null;
@@ -136,32 +135,49 @@ class _GameScreenState extends ConsumerState<GameScreen> with WidgetsBindingObse
                   ),
                 ),
               ),
-              // Fixed height so showing a hint does not shove the board and
-              // the number pad around mid-game.
-              SizedBox(
-                height: 44,
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 16),
-                  child: Center(
-                    child: state.lastHint != null && state.hintHighlight.isNotEmpty
-                        ? Text(
-                            _techniqueText(l, state.lastHint!.techniqueId),
-                            textAlign: TextAlign.center,
-                            style: Theme.of(context).textTheme.bodySmall,
-                          )
-                        : const SizedBox.shrink(),
+              if (state.status == GameStatus.solved)
+                SolvedCard(
+                  title: _solvedTitle(l, state),
+                  subtitle: l.solvedBody(
+                    _difficultyLabel(l, state.puzzle.difficulty),
+                    formatDuration(state.elapsed),
+                    state.mistakes,
+                  ),
+                  note: state.isDaily ? l.dailySolvedNote : null,
+                  homeLabel: l.backHome,
+                  playAgainLabel: l.playAgain,
+                  onHome: () => unawaited(_goHome()),
+                  onPlayAgain: () =>
+                      unawaited(_playAgain(state.puzzle.difficulty)),
+                )
+              else ...[
+                // Fixed height so showing a hint does not shove the board and
+                // the number pad around mid-game.
+                SizedBox(
+                  height: 44,
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(horizontal: 16),
+                    child: Center(
+                      child: state.lastHint != null && state.hintHighlight.isNotEmpty
+                          ? Text(
+                              _techniqueText(l, state.lastHint!.techniqueId),
+                              textAlign: TextAlign.center,
+                              style: Theme.of(context).textTheme.bodySmall,
+                            )
+                          : const SizedBox.shrink(),
+                    ),
                   ),
                 ),
-              ),
-              GameToolbar(
-                canUndo: state.canUndo,
-                crossMode: state.crossMode,
-                freeHintsLeft: state.freeHintsLeft,
-                onUndo: controller.undo,
-                onErase: controller.erase,
-                onToggleCross: controller.toggleCrossMode,
-                onHint: () => _onHint(controller),
-              ),
+                GameToolbar(
+                  canUndo: state.canUndo,
+                  crossMode: state.crossMode,
+                  freeHintsLeft: state.freeHintsLeft,
+                  onUndo: controller.undo,
+                  onErase: controller.erase,
+                  onToggleCross: controller.toggleCrossMode,
+                  onHint: () => _onHint(controller),
+                ),
+              ],
               const BannerSlot(),
             ],
           ),
@@ -179,34 +195,27 @@ class _GameScreenState extends ConsumerState<GameScreen> with WidgetsBindingObse
     }
   }
 
-  Future<void> _showSolved(GameViewState s) async {
-    final l = AppLocalizations.of(context);
+  /// "You drew: Cat!" — falls back to the plain solved title if the puzzle
+  /// somehow carries no shape (it always should).
+  static String _solvedTitle(AppLocalizations l, GameViewState s) {
+    final shape = NonogramGenerator.shapeOf(s.puzzle);
+    return shape == null
+        ? l.solvedTitle
+        : l.youDrew(shapeDisplayName(l, shape.id));
+  }
+
+  Future<void> _goHome() async {
     final controller = ref.read(gameControllerProvider.notifier);
-    final again = await showDialog<bool>(
-      context: context,
-      barrierDismissible: false,
-      builder: (context) => AlertDialog(
-        title: Text(l.solvedTitle),
-        content: Text(l.solvedBody(
-          _difficultyLabel(l, s.puzzle.difficulty),
-          formatDuration(s.elapsed),
-          s.mistakes,
-        )),
-        actions: [
-          TextButton(onPressed: () => Navigator.pop(context, false), child: Text(l.backHome)),
-          FilledButton(onPressed: () => Navigator.pop(context, true), child: Text(l.playAgain)),
-        ],
-      ),
-    );
-    if (!mounted) return;
+    await controller.maybeShowInterstitial();
+    await controller.abandon();
+    if (mounted) Navigator.of(context).pop();
+  }
+
+  Future<void> _playAgain(Difficulty difficulty) async {
+    final controller = ref.read(gameControllerProvider.notifier);
     await controller.maybeShowInterstitial();
     if (!mounted) return;
-    if (again == true) {
-      await controller.startNew(s.puzzle.difficulty);
-    } else {
-      await controller.abandon();
-      if (mounted) Navigator.of(context).pop();
-    }
+    await controller.startNew(difficulty);
   }
 
   Future<void> _showFailed(GameViewState s) async {

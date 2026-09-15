@@ -70,9 +70,14 @@ class GameSession {
 
   int get emptyCount => _board.where((v) => v == 0).length;
 
+  /// Completion is judged by the rule, not by exact equality with the
+  /// solution — a nonogram cross (an annotation, never a solution value)
+  /// on a genuinely blank cell must not hold the win hostage. Same hook
+  /// as [place] uses; the default is exact match, so Sudoku still
+  /// requires every cell to equal the solution.
   bool get isSolved {
     for (var i = 0; i < _board.length; i++) {
-      if (_board[i] != puzzle.solution[i]) return false;
+      if (!rule.isCorrect(i, _board[i], puzzle.solution)) return false;
     }
     return true;
   }

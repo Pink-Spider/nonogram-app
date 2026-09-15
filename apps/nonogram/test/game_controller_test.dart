@@ -166,6 +166,32 @@ void main() {
     expect(state().status, GameStatus.solved);
   });
 
+  test('crosses left on blank cells do not block completion', () async {
+    await controller.startNew(Difficulty.easy, seed: 6);
+    final solution = List<int>.from(state().puzzle.solution);
+
+    // Cross a few genuinely blank cells first — solving with X marks on
+    // the board is how the game is actually played, and the win must not
+    // require erasing them (regression: isSolved compared board ==
+    // solution exactly, so any X held the win hostage).
+    controller.toggleCrossMode();
+    final blanks = [
+      for (var i = 0; i < solution.length; i++)
+        if (solution[i] != Cell.filled) i,
+    ];
+    for (final i in blanks.take(3)) {
+      controller.tapCell(i);
+    }
+    controller.toggleCrossMode();
+
+    for (var i = 0; i < solution.length; i++) {
+      if (solution[i] == Cell.filled) controller.tapCell(i);
+    }
+
+    expect(state().board.where((v) => v == Cell.crossed).length, 3);
+    expect(state().status, GameStatus.solved);
+  });
+
   test('resume restores a saved session with its clues', () async {
     await controller.startNew(Difficulty.medium, seed: 7);
     final cell = firstFilled();
