@@ -35,10 +35,18 @@ cd "$APP"
 BUILD_NAME="$(grep '^version:' pubspec.yaml | sed -E 's/^version: *([^+]+)\+.*/\1/')"
 BUILD_NUMBER="${1:-$(grep '^version:' pubspec.yaml | sed -E 's/^.*\+//')}"
 
+# Real ad unit ids are baked in at build time via --dart-define; without
+# them the prod flavor silently falls back to Google's test units and
+# earns nothing. ad_units.sh exits non-zero when the env file is missing,
+# and set -e stops the build right there.
+AD_DEFINES="$(tool/ad_units.sh)"
+
 say "Building $BUILD_NAME ($BUILD_NUMBER) from $ENTRY"
+# shellcheck disable=SC2086 — AD_DEFINES is a list of flags on purpose.
 flutter build ipa -t "$ENTRY" \
   --build-name="$BUILD_NAME" \
-  --build-number="$BUILD_NUMBER"
+  --build-number="$BUILD_NUMBER" \
+  $AD_DEFINES
 
 IPA="$(ls "$APP"/build/ios/ipa/*.ipa | head -1)"
 

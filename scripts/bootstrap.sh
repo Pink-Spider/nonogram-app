@@ -13,17 +13,13 @@ ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP="$ROOT/apps/nonogram"
 ORG="io.pinkspider"
 
-# AdMob *app* ids.
+# AdMob *app* ids — the real ones (created 2026-09-15).
 #
-# STILL GOOGLE'S TEST IDS — this app has no AdMob entry yet. The SDK aborts
-# at startup without an app id ("Missing application ID"), so these keep the
-# build runnable, but they are not ours: no revenue, and the UMP consent
-# form never appears because consent is tied to a real publisher.
-#
-# Replace both before any store submission, then re-run this script.
-# Console: https://apps.admob.com (account: developer.ygpark@gmail.com)
-ADMOB_APP_ID_ANDROID="ca-app-pub-3940256099942544~3347511713"
-ADMOB_APP_ID_IOS="ca-app-pub-3940256099942544~1458002511"
+# Console: https://apps.admob.com (account: developer.ygpark@gmail.com).
+# The 6 ad *unit* ids live outside the repo in
+# ~/.pink-spider/secrets/nonogram/ad-units.env — see docs/ad-units.md.
+ADMOB_APP_ID_ANDROID="ca-app-pub-6329038356545416~7260119820"
+ADMOB_APP_ID_IOS="ca-app-pub-6329038356545416~4365354012"
 
 say() { printf '\n\033[1;34m▶ %s\033[0m\n' "$*"; }
 die() { printf '\033[1;31m✖ %s\033[0m\n' "$*" >&2; exit 1; }

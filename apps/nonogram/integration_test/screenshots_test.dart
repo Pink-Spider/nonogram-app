@@ -32,7 +32,8 @@ void main() {
 
   for (final locale in _locales) {
     testWidgets('screenshots — $locale', (tester) async {
-      SharedPreferences.setMockInitialValues({});
+      // Tutorial marked done, or the first-run tutorial covers every shot.
+      SharedPreferences.setMockInitialValues({'tutorial.done': true});
       final prefs = await SharedPreferences.getInstance();
 
       final container = ProviderContainer(
@@ -97,6 +98,19 @@ void main() {
         }
       }
       await shoot('4-crosses');
+
+      // 5. The reveal — the whole reason the game exists. Finish the
+      //    board so the grid melts into the picture and the solved card
+      //    slides up with the shape's name.
+      final c3 = container.read(gameControllerProvider.notifier);
+      c3.toggleCrossMode(); // back to fill mode
+      for (var i = 0; i < solution.length; i++) {
+        if (solution[i] == Cell.filled &&
+            container.read(gameControllerProvider)!.board[i] != Cell.filled) {
+          c3.tapCell(i);
+        }
+      }
+      await shoot('5-reveal');
 
       container.read(gameControllerProvider.notifier).pause();
     });

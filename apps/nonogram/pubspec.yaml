@@ -1,7 +1,7 @@
 name: nonogram
 description: Nonogram (Picross) — solve the clues, uncover the picture. Ad-supported, no IAP.
 publish_to: none
-version: 0.1.0+1
+version: 0.1.0+3
 resolution: workspace
 
 environment:
