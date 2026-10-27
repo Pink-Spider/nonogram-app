@@ -20,10 +20,13 @@ UMP 정책 변경, 새 Play 요구사항이 오면 두 번 고쳐야 한다는 �
   README의 스토어 배지가 이 두 링크를 쓴다.
 - AdMob 앱 ID는 실제 값이다(`scripts/bootstrap.sh` 상단과 두 매니페스트).
   광고 단위 6개는 리포 밖 `ad-units.env`에 있다.
+  두 앱 모두 AdMob 콘솔에서 스토어 리스팅에 연결했다(2026-10-27).
 - 릴리스 빌드 스크립트(`fastlane build`, `upload_ios.sh`, `build_ios.sh`)는
   전부 `tool/ad_units.sh`를 거친다. 파일이 없으면 빌드가 실패한다 —
   prod가 조용히 Google 테스트 단위로 폴백해 수익 0으로 나가는 것을 막는다.
-- **Play 서비스 계정은 아직 없다.** `fastlane internal|production`은 인증에서 멈춘다.
+- Play 업로드용 서비스 계정 `nonogram-publisher@pink-spider-play.iam.gserviceaccount.com`
+  (노노그램 전용)과 키가 있다. **Play Console에서 앱 권한을 받기 전까지**
+  `fastlane internal|production`은 `The caller does not have permission`으로 멈춘다.
 - 서명 키는 있다(노노그램 전용, 스도쿠와 다른 키).
 - **계정이 서비스마다 다르다.** Play Console은 `ceo@pink-spider.io`,
   AdMob은 `developer.ygpark@gmail.com`(Play 권한 없음). `docs/store-listing.md` 참고.
@@ -142,12 +145,13 @@ iOS 15.0. App Store Connect가 15 미만 업로드를 거부하는데 flutter cr
 
 - `scripts/upload_ios.sh [빌드번호]` — 빌드 + TestFlight 업로드. App Store
   Connect API 키 필요: `~/.appstoreconnect/private_keys/AuthKey_<ID>.p8` +
-  `ASC_KEY_ID=XXXXXXXXXX` / `ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx`
-  환경변수(키 파일은 이미 있음, ID는 비밀 아님). 아카이브가 "sandbox is not
+  `ASC_KEY_ID`/`ASC_ISSUER_ID`. 두 ID는 리포 밖 `asc.env`(시크릿 폴더)에 있고
+  스크립트가 자동으로 읽는다. **리포가 public이라 ID 값을 리포에 적지 않는다.**
+  아카이브가 "sandbox is not
   in sync with Podfile.lock"으로 죽으면 `(cd ios && pod install)` 후 재시도.
 - **앱 레코드는 만들어져 있다**(2026-09-14, Apple ID 6811762171, 웹 UI에서
   생성 — API로는 못 만든다). TestFlight 내부 그룹 "Internal Testers"
-  (자동 배포 켬, 테스터: ceo@pink-spider.io 외 1명),
+  (자동 배포 켬, 테스터 2명 — 명단은 ASC에서 확인. 개인 이메일은 리포에 적지 않는다),
   빌드 3까지 올라가 있다(`apps/nonogram/pubspec.yaml`의 `0.1.0+3`).
   재업로드 때는 빌드번호만 올리면 된다.
 - `scripts/build_ios.sh [빌드번호]` — Transporter용 서명 IPA. 같은
@@ -167,7 +171,8 @@ iOS 15.0. App Store Connect가 15 미만 업로드를 거부하는데 flutter cr
   upload-keystore.jks                 업로드 키 — 잃으면 앱 업데이트 불가
   key.properties
   ad-units.env                        광고 단위 6개 (유출되면 AdMob 계정 정지 위험)
-  play-store-key.json                 (아직 없음)
+  play-store-key.json                 nonogram-publisher 서비스 계정 키 (프로덕션 업로드 가능)
+  asc.env                             App Store Connect API 키 ID 2개 (upload_ios.sh)
 ```
 
 **리포 밖에 둔다.** gitignore만으로는 `git clean -xdf`에 날아간다.
@@ -204,11 +209,9 @@ flutter analyze                                 # 루트에서 워크스페이�
 
 ## 다음 단계 (우선순위 순)
 
-1. AdMob 콘솔에서 두 앱이 "스토어 추가"로 스토어 리스팅에 연결됐는지
-   확인한다 — 연결 안 하면 광고 제한이 안 풀린다.
-2. Play 서비스 계정 생성 → Play Console에서 앱 권한 부여 →
-   `play-store-key.json` 배치 → fastlane 업로드 (`docs/play-api-automation.md`)
-3. 도형 추가는 출시 후에도 계속 (전 사이즈 두 자릿수까지 채웠지만
+1. Play Console에서 `nonogram-publisher` 서비스 계정에 앱 권한 부여 →
+   `fastlane internal`로 확인 (`docs/play-api-automation.md` 3·4번)
+2. 도형 추가는 출시 후에도 계속 (전 사이즈 두 자릿수까지 채웠지만
    많을수록 좋다). `tool/shape_lab.dart`로 실험.
 
 완성 시 그림 공개(SolvedCard), 통계 화면, 데일리 스트릭은 구현됨.

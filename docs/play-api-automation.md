@@ -12,18 +12,16 @@ fastlane production    # 프로덕션 (초안으로만 올라간다)
 `fastlane`은 Homebrew로 깔았다(`brew install fastlane`, 2.239.0). 시스템 Ruby 2.6은
 최신 fastlane과 맞지 않아 gem 설치는 피했다.
 
-## 아직 설정 안 됨
+## 현재 설정 (2026-10-27)
 
-이 앱에는 **Play Developer API 서비스 계정이 없다.** 파일(Appfile/Fastfile)은
-준비돼 있지만 키가 없어 `fastlane internal|production`은 인증에서 멈춘다.
+- GCP 프로젝트: `pink-spider-play` (스도쿠와 같은 프로젝트)
+- 서비스 계정: **`nonogram-publisher@pink-spider-play.iam.gserviceaccount.com`**
+  — 노노그램 전용. 스도쿠 키와 나눠서, 한쪽 키가 새도 다른 앱은 못 건드린다.
+- 키: `~/.pink-spider/secrets/nonogram/play-store-key.json`
+- `fastlane run validate_play_store_json_key` 통과 (Google 인증 OK)
 
-만드는 절차는 아래 "처음부터 다시 만들 때" 그대로다. 스도쿠는
-`pink-spider-play` 프로젝트를 썼고, 노노그램은 **같은 프로젝트에 서비스 계정만
-추가해도 되고**(권한은 Play Console에서 앱별로 주므로) 프로젝트를 따로 파도 된다.
-전자가 관리할 것이 적다.
-
-Play Console에 앱을 만들기 전까지는 권한을 줄 대상 자체가 없으므로,
-스토어 등록이 먼저다.
+앱 권한은 Play Console에서 준다(아래 3번). 권한이 없으면
+`google_play_track_version_codes`가 `The caller does not have permission`으로 멈춘다.
 
 ## ⚠️ 서비스 계정 키
 
@@ -62,7 +60,7 @@ gcloud auth login          # 브라우저가 열린다. ceo@pink-spider.io로 �
 
 ```bash
 PROJECT=pink-spider-play
-SA=play-publisher
+SA=nonogram-publisher
 
 gcloud projects create "$PROJECT" --name="Pink Spider Play"
 gcloud config set project "$PROJECT"

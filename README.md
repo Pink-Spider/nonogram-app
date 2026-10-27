@@ -113,8 +113,15 @@ scripts/build_ios.sh [build-number]      # Transporter용 서명 IPA
 `apps/nonogram/pubspec.yaml`의 `+N`을 올린다.
 
 Android 서명은 [docs/android-signing.md](docs/android-signing.md),
-fastlane 업로드는 [docs/play-api-automation.md](docs/play-api-automation.md)
-(서비스 계정은 아직 없다).
+Play 업로드는 fastlane으로 한다. 빌드 후 초안(draft)으로만 올라가고, 출시는 콘솔에서 직접 한다.
+
+```bash
+cd apps/nonogram/android
+fastlane internal       # 내부 테스트 트랙
+fastlane production     # 프로덕션 (초안)
+```
+
+서비스 계정 설정은 [docs/play-api-automation.md](docs/play-api-automation.md).
 
 ## 라이선스
 

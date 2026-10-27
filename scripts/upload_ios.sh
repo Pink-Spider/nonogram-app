@@ -7,9 +7,12 @@
 #   App Store Connect -> Users and Access -> Integrations -> App Store Connect API
 #   Create a key with the "App Manager" role, download the .p8 ONCE, and put it at
 #     ~/.appstoreconnect/private_keys/AuthKey_<KEY_ID>.p8
-#   Then export the two ids (add them to your shell profile):
-#     export ASC_KEY_ID=XXXXXXXXXX
-#     export ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+#   Then put the two ids in ~/.pink-spider/secrets/nonogram/asc.env
+#   (or $NONOGRAM_SECRETS/asc.env, or export them yourself):
+#     ASC_KEY_ID=XXXXXXXXXX
+#     ASC_ISSUER_ID=xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx
+#   They are not in the repo: on their own they cannot sign in, but they
+#   are half of the credential, and the repo is public.
 #
 # The app record must already exist in App Store Connect: the API has no
 # endpoint to create one, so the first time you must add it in the web UI
@@ -19,6 +22,16 @@ set -euo pipefail
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 APP="$ROOT/apps/nonogram"
 ENTRY=lib/main_prod.dart
+
+# Same lookup order as the other secrets (ad_units.sh, Appfile).
+if [[ -z "${ASC_KEY_ID:-}" || -z "${ASC_ISSUER_ID:-}" ]]; then
+  for candidate in \
+    "${NONOGRAM_SECRETS:-}/asc.env" \
+    "$HOME/.pink-spider/secrets/nonogram/asc.env"; do
+    # shellcheck disable=SC1090
+    [[ -f "$candidate" ]] && { set -a; source "$candidate"; set +a; break; }
+  done
+fi
 
 : "${ASC_KEY_ID:?set ASC_KEY_ID (App Store Connect API key id)}"
 : "${ASC_ISSUER_ID:?set ASC_ISSUER_ID (App Store Connect issuer id)}"

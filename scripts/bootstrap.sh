@@ -128,13 +128,13 @@ cat <<EOF
    - ad-units.env (docs/ad-units.md). The release scripts refuse to build
      without it -- prod would otherwise fall back to Google's test units.
    - upload-keystore.jks + key.properties (docs/android-signing.md)
+   - play-store-key.json for 'fastlane internal|production'
+     (docs/play-api-automation.md)
 
   The consent form only appears while the GDPR + IDFA messages are
   published in AdMob -> Privacy & messaging (docs/admob-setup.md).
 
   Still not done:
-   - Play Developer API service account (docs/play-api-automation.md),
-     so 'fastlane internal|production' stops at auth for now
    - Firebase (google-services.json / GoogleService-Info.plist) and
      a Firebase-backed AnalyticsService / RemoteConfigService
 
