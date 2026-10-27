@@ -5,7 +5,8 @@
 # 1. checks the Flutter toolchain
 # 2. resolves the pub workspace
 # 3. generates android/ + ios/ for apps/nonogram if missing (flutter create)
-# 4. patches AdMob app ids (test ids) + minSdk into the platform projects
+# 4. patches the real AdMob app ids, iOS 15 deployment target, ATT text and
+#    SKAdNetwork into the platform projects
 # 5. generates localizations, runs analyze + all tests
 set -euo pipefail
 
@@ -123,15 +124,18 @@ cat <<EOF
   flutter run -t lib/main_dev.dart          # dev flavor (test ads)
   flutter run -t lib/main_prod.dart         # prod entrypoint
 
-  Before a store release — none of these are done yet:
-   - create the app in AdMob and put its real app ids at the top of this
-     script, then re-run it. The ids in here are Google's test ids: the
-     build runs, nothing earns, and the consent form never appears.
-   - real ad unit ids in ~/.pink-spider/secrets/nonogram/ad-units.env
-     (docs/ad-units.md). Without it prod falls back to test units.
-   - signing key: docs/android-signing.md
-   - configure the GDPR + IDFA messages in AdMob → Privacy & messaging
-   - add Firebase (google-services.json / GoogleService-Info.plist) and
+  Release builds need the secrets in ~/.pink-spider/secrets/nonogram/:
+   - ad-units.env (docs/ad-units.md). The release scripts refuse to build
+     without it -- prod would otherwise fall back to Google's test units.
+   - upload-keystore.jks + key.properties (docs/android-signing.md)
+
+  The consent form only appears while the GDPR + IDFA messages are
+  published in AdMob -> Privacy & messaging (docs/admob-setup.md).
+
+  Still not done:
+   - Play Developer API service account (docs/play-api-automation.md),
+     so 'fastlane internal|production' stops at auth for now
+   - Firebase (google-services.json / GoogleService-Info.plist) and
      a Firebase-backed AnalyticsService / RemoteConfigService
 
   Always check a release build on a device before submitting — debug

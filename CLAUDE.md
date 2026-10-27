@@ -1,4 +1,6 @@
-# CLAUDE.md — nonogram-app
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
 노노그램(피크로스) 앱. 인앱결제 없이 AdMob 광고만으로 수익을 내는 Pink Spider
 퍼즐 앱의 2호다. 1호는 `../sudoku-app`.
@@ -7,18 +9,24 @@
 sudoku-app에서 복사해 왔다.** 같은 모노레포에 넣는 안도 있었지만 별도 리포로
 갔다. 대신 **core 쪽 개선은 양쪽에 따로 반영해야 한다** — AdMob SDK 업그레이드,
 UMP 정책 변경, 새 Play 요구사항이 오면 두 번 고쳐야 한다는 뜻이다.
+네 패키지 모두 `lib`이 sudoku-app과 파일 단위로 동일하다(2026-10-27 확인).
+고친 뒤에는 `diff -rq packages/<pkg>/lib ../sudoku-app/packages/<pkg>/lib`로 맞출 것.
 
-## 현재 상태 (2026-09-14)
+## 현재 상태 (2026-10-27)
 
-- `./scripts/bootstrap.sh` 통과. `flutter analyze` 0건, 테스트 150개 통과
-  (puzzle_engine 14 / rules_nonogram 118 / core_ads 4 / apps_nonogram 14).
-- 릴리스 APK가 에뮬레이터에서 **크래시 없이 실행**되고 배너 광고가 뜬다.
-- **AdMob 앱 ID가 아직 Google 테스트 ID다.** 콘솔에 앱을 안 만들었다.
-  수익 0이고 UMP 동의창도 안 뜬다. `scripts/bootstrap.sh` 상단에서 교체.
-- **광고 단위 ID 없음.** prod가 조용히 테스트 단위로 폴백하므로 릴리스
-  스크립트가 막는다(`tool/ad_units.sh`).
-- Play Console·App Store 등록 전. 서비스 계정도 없다.
+- **양대 스토어에 출시됐다** (0.1.0+3). App Store는 2026-09-16 공개
+  (<https://apps.apple.com/app/id6811762171>), Play는 프로덕션 177개국
+  (<https://play.google.com/store/apps/details?id=io.pinkspider.nonogram>).
+  README의 스토어 배지가 이 두 링크를 쓴다.
+- AdMob 앱 ID는 실제 값이다(`scripts/bootstrap.sh` 상단과 두 매니페스트).
+  광고 단위 6개는 리포 밖 `ad-units.env`에 있다.
+- 릴리스 빌드 스크립트(`fastlane build`, `upload_ios.sh`, `build_ios.sh`)는
+  전부 `tool/ad_units.sh`를 거친다. 파일이 없으면 빌드가 실패한다 —
+  prod가 조용히 Google 테스트 단위로 폴백해 수익 0으로 나가는 것을 막는다.
+- **Play 서비스 계정은 아직 없다.** `fastlane internal|production`은 인증에서 멈춘다.
 - 서명 키는 있다(노노그램 전용, 스도쿠와 다른 키).
+- **계정이 서비스마다 다르다.** Play Console은 `ceo@pink-spider.io`,
+  AdMob은 `developer.ygpark@gmail.com`(Play 권한 없음). `docs/store-listing.md` 참고.
 
 ## 게임 설계
 
@@ -46,6 +54,10 @@ UMP 정책 변경, 새 Play 요구사항이 오면 두 번 고쳐야 한다는 �
 - `packages/core_ads` 앱은 `AdService`만 쓴다(`google_mobile_ads` 직접 import 금지).
 - `apps/nonogram` Riverpod 2. 보드는 `NonogramBoard` `CustomPainter` 하나.
 - l10n: `flutter gen-l10n`, ARB는 `apps/nonogram/lib/l10n/`. en/ko/ja/de.
+  **ja에 「ピクロス」, en에 "Picross"를 쓰지 않는다** — 닌텐도 상표다.
+  ja는 ノノグラム, en은 "Picture Cross"를 쓴다.
+- 앱 동작(수집 데이터, 광고, 기능)이 바뀌면 `docs/store-listing.md`와
+  개인정보처리방침(`docs/privacy-policy.html`)을 함께 고친다.
 
 ## 셀 값
 
@@ -136,7 +148,8 @@ iOS 15.0. App Store Connect가 15 미만 업로드를 거부하는데 flutter cr
 - **앱 레코드는 만들어져 있다**(2026-09-14, Apple ID 6811762171, 웹 UI에서
   생성 — API로는 못 만든다). TestFlight 내부 그룹 "Internal Testers"
   (자동 배포 켬, 테스터: ceo@pink-spider.io 외 1명),
-  0.1.0(1) 배포됨. 재업로드 때는 빌드번호만 올리면 된다.
+  빌드 3까지 올라가 있다(`apps/nonogram/pubspec.yaml`의 `0.1.0+3`).
+  재업로드 때는 빌드번호만 올리면 된다.
 - `scripts/build_ios.sh [빌드번호]` — Transporter용 서명 IPA. 같은
   버전+빌드번호는 재업로드가 거부되므로 올릴 때마다 빌드번호를 올린다.
 - `tool/screenshots.sh [시뮬레이터]` — 지원 로케일 전부의 스토어 스크린샷을
@@ -153,7 +166,7 @@ iOS 15.0. App Store Connect가 15 미만 업로드를 거부하는데 flutter cr
 ~/.pink-spider/secrets/nonogram/     (700)
   upload-keystore.jks                 업로드 키 — 잃으면 앱 업데이트 불가
   key.properties
-  ad-units.env                        (아직 없음)
+  ad-units.env                        광고 단위 6개 (유출되면 AdMob 계정 정지 위험)
   play-store-key.json                 (아직 없음)
 ```
 
@@ -163,26 +176,38 @@ gradle과 Appfile이 `$NONOGRAM_SECRETS` → `~/.pink-spider/secrets/nonogram/` 
 
 서명 지문(SHA-256): `docs/android-signing.md`. 광고 단위 ID 발급·주입 방식:
 `docs/ad-units.md`. Play 업로드 자동화(fastlane supply, 서비스 계정):
-`docs/play-api-automation.md`.
+`docs/play-api-automation.md`. 스토어 문구·설문 답변·에셋 크기:
+`docs/store-listing.md`.
 
 ## 명령
 
 ```bash
-./scripts/bootstrap.sh                          # 최초 1회 (idempotent)
+./scripts/bootstrap.sh                          # 최초 1회 (idempotent), analyze + 전체 테스트까지 돈다
 flutter pub get                                 # 루트
+flutter analyze                                 # 루트에서 워크스페이스 전체
+
+# 테스트 — 순수 Dart 패키지는 dart test, Flutter 패키지는 flutter test
+(cd packages/puzzle_engine && dart test)
 (cd packages/rules_nonogram && dart test)
+(cd packages/core_ads && flutter test)
 (cd apps/nonogram && flutter gen-l10n && flutter test)
+
+# 하나만
+(cd packages/rules_nonogram && dart test test/shapes_test.dart)
+(cd packages/rules_nonogram && dart test -n "<테스트 이름 일부>")
+(cd apps/nonogram && flutter test test/streak_test.dart --plain-name "<이름>")
+
+(cd packages/rules_nonogram && dart run tool/shape_lab.dart)   # 도형 실험대
 (cd apps/nonogram && flutter run -t lib/main_dev.dart)
-(cd apps/nonogram/android && fastlane production)   # 광고 ID 있어야 동작
+(cd apps/nonogram/android && fastlane production)   # 서비스 계정 키 있어야 동작
 ```
 
 ## 다음 단계 (우선순위 순)
 
-1. AdMob 콘솔에 앱 생성 → 실제 앱 ID 2개를 `bootstrap.sh`에 넣고 재실행,
-   광고 단위 6개를 `ad-units.env`에. **전체 순서는 `docs/admob-setup.md`**,
-   개인정보처리방침은 `docs/privacy-policy.html`(호스팅 필요)
-2. Play Console 등록 → 서비스 계정 권한 → fastlane 업로드
-   (App Store 쪽은 앱 레코드·TestFlight 내부 테스트까지 완료)
+1. AdMob 콘솔에서 두 앱이 "스토어 추가"로 스토어 리스팅에 연결됐는지
+   확인한다 — 연결 안 하면 광고 제한이 안 풀린다.
+2. Play 서비스 계정 생성 → Play Console에서 앱 권한 부여 →
+   `play-store-key.json` 배치 → fastlane 업로드 (`docs/play-api-automation.md`)
 3. 도형 추가는 출시 후에도 계속 (전 사이즈 두 자릿수까지 채웠지만
    많을수록 좋다). `tool/shape_lab.dart`로 실험.
 
