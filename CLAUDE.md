@@ -25,8 +25,10 @@ UMP 정책 변경, 새 Play 요구사항이 오면 두 번 고쳐야 한다는 �
   전부 `tool/ad_units.sh`를 거친다. 파일이 없으면 빌드가 실패한다 —
   prod가 조용히 Google 테스트 단위로 폴백해 수익 0으로 나가는 것을 막는다.
 - Play 업로드용 서비스 계정 `nonogram-publisher@pink-spider-play.iam.gserviceaccount.com`
-  (노노그램 전용)과 키가 있다. **Play Console에서 앱 권한을 받기 전까지**
-  `fastlane internal|production`은 `The caller does not have permission`으로 멈춘다.
+  (노노그램 전용)이 Play Console에서 Nonogram Daily 권한을 받았다(2026-10-27).
+  `fastlane internal|production`으로 업로드할 수 있다. 실제 업로드는 아직 한 번도 안 해 봤다.
+- **리포는 public이다**(2026-10-27). 비밀 값(키 ID, 광고 단위, 개인 이메일)을
+  커밋하지 않는다. 히스토리에서 지우려면 리포를 다시 만들어야 했다.
 - 서명 키는 있다(노노그램 전용, 스도쿠와 다른 키).
 - **계정이 서비스마다 다르다.** Play Console은 `ceo@pink-spider.io`,
   AdMob은 `developer.ygpark@gmail.com`(Play 권한 없음). `docs/store-listing.md` 참고.
@@ -209,8 +211,7 @@ flutter analyze                                 # 루트에서 워크스페이�
 
 ## 다음 단계 (우선순위 순)
 
-1. Play Console에서 `nonogram-publisher` 서비스 계정에 앱 권한 부여 →
-   `fastlane internal`로 확인 (`docs/play-api-automation.md` 3·4번)
+1. 다음 Android 버전은 `fastlane internal`로 올려서 업로드 경로를 처음 검증한다.
 2. 도형 추가는 출시 후에도 계속 (전 사이즈 두 자릿수까지 채웠지만
    많을수록 좋다). `tool/shape_lab.dart`로 실험.
 

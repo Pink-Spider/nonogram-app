@@ -20,8 +20,9 @@ fastlane production    # 프로덕션 (초안으로만 올라간다)
 - 키: `~/.pink-spider/secrets/nonogram/play-store-key.json`
 - `fastlane run validate_play_store_json_key` 통과 (Google 인증 OK)
 
-앱 권한은 Play Console에서 준다(아래 3번). 권한이 없으면
-`google_play_track_version_codes`가 `The caller does not have permission`으로 멈춘다.
+- Play Console 앱 권한: Nonogram Daily에 부여함(아래 3번).
+  `google_play_track_version_codes ... track:production`이 `[3]`을 돌려준다.
+- 실제 업로드는 아직 한 번도 안 해 봤다.
 
 ## ⚠️ 서비스 계정 키
 
